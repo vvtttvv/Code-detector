@@ -25,7 +25,6 @@ int main() {
     DIR *dir;
     struct dirent *entry;
     
-    // Открыть файл для записи вывода
     ofstream outputFile("result/result.txt");
     
     if ((dir = opendir(files_directory.c_str())) != NULL) {

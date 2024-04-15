@@ -1,0 +1,6 @@
+For file 1
+Plagiarism probability: 6.72796%
+Not plagiarised! ^^
+For file 2
+Plagiarism probability: 83.1574%
+Plagiarised!   :(

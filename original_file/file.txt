@@ -1,2 +1,668 @@
-Hello world
-sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+MINISTRY OF EDUCATION, CULTURE AND RESEARCH
+OF THE REPUBLIC OF MOLDOVA
+Technical University of Moldova
+Faculty of Computers, Informatics and Microelectronics
+Department of Software and Automation Engineering
+
+
+Titerez Vladislav
+Group: FAF-233
+Report
+Laboratory Work No.4
+
+of the "Data Structures and Algorithms" course
+
+Checked:
+Burlacu Natalia, PhD, associate professor
+Department of Software and Automation Engineering,
+FCIM Faculty, UTM
+
+
+
+
+
+
+
+Chisinau – 2024
+The purpose of the laboratory work
+The purpose of laboratory work involving struct typedef union in C, along with header files, focuses on enhancing understanding and application of fundamental programming concepts. Through this exercise, students delve into the intricacies of data structures and memory management, honing their skills in structuring complex data types efficiently. By repeatedly implementing merge sort and quick sort algorithms, learners gain valuable insights into algorithmic design, efficiency analysis, and code optimization. Furthermore, utilizing header files emphasizes modular programming practices, fostering code reusability and maintainability. Ultimately, this laboratory work fosters a deeper comprehension of C programming paradigms and cultivates essential problem-solving abilities in algorithmic contexts.
+Part A
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "train_registry_struct.h"
+
+#define WHITE   "\033[0m"
+#define ORANGE  "\033[1;38;5;208m"
+#define GREEN   "\033[1;32m"
+
+void inputTrainDetails(TrainRegistry *ptr, int index);
+void displayTrainDetails(const TrainRegistry *ptr, int index);
+void quickSort(TrainRegistry *arr, int low, int high);
+void mergeSort(TrainRegistry arr[], int l, int r);
+void modifyTrainDetails(TrainRegistry *ptr, int size);
+
+int train_registry_struct_main() {
+    int choice, size;
+    int count = 0;
+   
+    printf("Enter number of trains: ");
+    scanf("%d", &size);
+   
+    TrainRegistry *trainPtr = malloc(size * sizeof(TrainRegistry));
+   
+    printf("Choose an option:\n");
+    printf("1. Input train details\n");
+    printf("2. Display train details\n");
+    printf("3. Sort train details in ascending order\n");
+    printf("4. Sort train details in descending order\n");
+    printf("5. Modify train details\n");
+    printf("6. Exit\n");
+    do {
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                if (count < size) {
+                    for (int i = 0; i < size; i++) {
+                        printf("\nEnter details for train %d:\n", i+1);
+                        inputTrainDetails(trainPtr, i);
+                        count++;
+                    }
+                } else {
+                    printf(ORANGE "Sorry, but you already entered the maximal number of trains :(\n" WHITE);
+                }
+                break;
+            case 2:
+                if (count == size) {
+                    printf("\nDisplaying train details:\n");
+                    for (int i = 0; i < size; i++) {
+                        printf("\nDetails for Train %d:\n", i+1);
+                        displayTrainDetails(trainPtr, i);
+                    }
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 3:
+                if (count == size) {
+                    quickSort(trainPtr, 0, size - 1);
+                    printf( GREEN "Train details sorted in desscending order:\n" WHITE);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 4:
+                if (count == size) {
+                    mergeSort(trainPtr, 0, size - 1);
+                    printf(GREEN "Train details sorted in descending order.\n" WHITE);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 5:
+                if (count == size) {
+                    modifyTrainDetails(trainPtr, size);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            default:
+                printf(ORANGE "\nExiting program." WHITE);
+                choice = 6;
+        }
+    } while(choice != 6);
+    free(trainPtr);
+    return 0;
+}
+
+// Function to input train details
+void inputTrainDetails(TrainRegistry *ptr, int index) {
+    int circ;
+    printf("Enter train number: ");
+    scanf("%d", &(ptr[index].train_number));
+    printf("Enter destination: ");
+    scanf("%s", ptr[index].destination);
+    printf("Enter departure time (hour minutes): ");
+    scanf("%d %d", &(ptr[index].departure_hour), &(ptr[index].departure_minutes));
+    if(ptr[index].departure_hour>23||ptr[index].departure_hour<0){
+        printf("You selected wrong hour, it will be assumed as 00\n");
+        ptr[index].departure_hour = 0;
+    }
+    if(ptr[index].departure_minutes>59||ptr[index].departure_minutes<0){
+        printf("You selected wrong minutes, it will be assumed as 00\n");
+        ptr[index].departure_minutes = 0;
+    }
+    printf("Enter arrival time (hour minutes): ");
+    scanf("%d %d", &(ptr[index].arrival_hour), &(ptr[index].arrival_minutes));
+    if(ptr[index].arrival_hour>23||ptr[index].arrival_hour<0){
+        printf("You selected wrong hour, it will be assumed as 00\n");
+        ptr[index].arrival_hour = 0;
+    }
+    if(ptr[index].arrival_minutes>59||ptr[index].arrival_minutes<0){
+        printf("You selected wrong minutes, it will be assumed as 00\n");
+        ptr[index].arrival_minutes = 0;
+    }
+    printf("Enter circulation days (1 - Daily, 2 - Odd, 3 - Even): ");
+    scanf("%d", &circ);
+    if(circ == 1){
+        strcpy(ptr[index].circulation_days, "Daily");
+    } else if(circ == 2) {
+        strcpy(ptr[index].circulation_days, "Odd");
+    } else {
+        strcpy(ptr[index].circulation_days, "Even");
+    }
+}
+
+// Function to display train details
+void displayTrainDetails(const TrainRegistry *ptr, int index) {
+    printf("Train number: %d\n", ptr[index].train_number);
+    printf("Destination: %s\n", ptr[index].destination);
+    printf("Departure time: %02d:%02d\n", ptr[index].departure_hour, ptr[index].departure_minutes);
+    printf("Arrival time: %02d:%02d\n", ptr[index].arrival_hour, ptr[index].arrival_minutes);
+    printf("Circulation days: %s\n", ptr[index].circulation_days);
+}
+
+// Function to partition the array for Quick Sort based on departure time
+int partition(TrainRegistry *arr, int low, int high) {
+    int pivot_hour = arr[high].departure_hour;
+    int pivot_minute = arr[high].departure_minutes;
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j].departure_hour < pivot_hour || (arr[j].departure_hour == pivot_hour && arr[j].departure_minutes < pivot_minute)) {
+            i++;
+            TrainRegistry temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    TrainRegistry temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    return (i + 1);
+}
+
+// Function to perform Quick Sort on train details based on departure time
+void quickSort(TrainRegistry *arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+// Function to perform Merge Sort on train details based on departure time
+void merge(TrainRegistry arr[], int l, int m, int r) {
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    TrainRegistry L[n1], R[n2];
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+    i = 0;
+    j = 0;
+    k = l;
+    while (i < n1 && j < n2) {
+        if (strcmp(L[i].destination, R[j].destination) >= 0) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort(TrainRegistry arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
+        merge(arr, l, m, r);
+    }
+}
+
+// Function to modify train details
+void modifyTrainDetails(TrainRegistry *ptr, int size) {
+    int train_number;
+    printf("Enter train number to modify: ");
+    scanf("%d", &train_number);
+
+    int found_index = -1;
+    for (int i = 0; i < size; i++) {
+        if (ptr[i].train_number == train_number) {
+            found_index = i;
+            break;
+        }
+    }
+
+    if (found_index != -1) {
+        printf("Train with train number %d found. Choose what to modify:\n", train_number);
+        printf("1. Everything\n");
+        printf("2. Train number\n");
+        printf("3. Destination\n");
+        printf("4. Departure time\n");
+        printf("5. Arrival time\n");
+        printf("6. Circulation days\n");
+        int choice;
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                inputTrainDetails(ptr, found_index);
+                printf("Train details modified successfully.\n");
+                break;
+            case 2:
+                printf("Enter new train number: ");
+                scanf("%d", &ptr[found_index].train_number);
+                printf("Train number modified successfully.\n");
+                break;
+            case 3:
+                printf("Enter new destination: ");
+                scanf("%s", ptr[found_index].destination);
+                printf("Destination modified successfully.\n");
+                break;
+            case 4:
+                printf("Enter new departure time (hour minutes): ");
+                scanf("%d %d", &ptr[found_index].departure_hour, &ptr[found_index].departure_minutes);
+                printf("Departure time modified successfully.\n");
+                break;
+            case 5:
+                printf("Enter new arrival time (hour minutes): ");
+                scanf("%d %d", &ptr[found_index].arrival_hour, &ptr[found_index].arrival_minutes);
+                printf("Arrival time modified successfully.\n");
+                break;
+            case 6:
+                printf("Enter new circulation days: ");
+                scanf("%s", ptr[found_index].circulation_days);
+                printf("Circulation days modified successfully.\n");
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+    } else {
+        printf("Train with train number %d not found.\n", train_number);
+    }
+}
+
+Header file:
+#ifndef TRAIN_REGISTRY_STRUCT_H
+#define TRAIN_REGISTRY_STRUCT_H
+typedef struct {
+    int train_number;
+    char destination[50];
+    int departure_hour;
+    int departure_minutes;
+    int arrival_hour;
+    int arrival_minutes;
+    char circulation_days[10];
+} TrainRegistry;
+int train_registry_struct_main();
+#endif
+Part B
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "train_registry_optimized.h"
+
+#define WHITE   "\033[0m"
+#define ORANGE  "\033[1;38;5;208m"
+#define GREEN   "\033[1;32m"
+
+void inputTrainDetails_optimized(TrainRegistry_optimized *ptr, int index);
+void displayTrainDetails_optimized(const TrainRegistry_optimized *ptr, int index);
+void quickSort_optimized(TrainRegistry_optimized *arr, int low, int high);
+void mergeSort_optimized(TrainRegistry_optimized arr[], int l, int r);
+void modifyTrainDetails_optimized(TrainRegistry_optimized *ptr, int size);
+
+int train_registry_optimized_main() {
+    int choice, size;
+    int count = 0;
+   
+    printf("Enter number of trains: ");
+    scanf("%d", &size);
+   
+    TrainRegistry_optimized *trainPtr = malloc(size * sizeof(TrainRegistry_optimized));
+   
+    printf("Choose an option:\n");
+    printf("1. Input train details\n");
+    printf("2. Display train details\n");
+    printf("3. Sort train details in ascending order\n");
+    printf("4. Sort train details in descending order\n");
+    printf("5. Modify train details\n");
+    printf("6. Exit\n");
+    do {
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+        switch(choice) {
+            case 1:
+                if (count < size) {
+                    for (int i = 0; i < size; i++) {
+                        printf("\nEnter details for train %d:\n", i+1);
+                        inputTrainDetails_optimized(trainPtr, i);
+                        count++;
+                    }
+                } else {
+                    printf(ORANGE "Sorry, but you already entered the maximal number of trains :(\n" WHITE);
+                }
+                break;
+            case 2:
+                if (count == size) {
+                    printf("\nDisplaying train details:\n");
+                    for (int i = 0; i < size; i++) {
+                        printf("\nDetails for Train %d:\n", i+1);
+                        displayTrainDetails_optimized(trainPtr, i);
+                    }
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 3:
+                if (count == size) {
+                    quickSort_optimized(trainPtr, 0, size - 1);
+                    printf( GREEN "Train details sorted in desscending order:\n" WHITE);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 4:
+                if (count == size) {
+                    mergeSort_optimized(trainPtr, 0, size - 1);
+                    printf(GREEN "Train details sorted in descending order.\n" WHITE);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            case 5:
+                if (count == size) {
+                    modifyTrainDetails_optimized(trainPtr, size);
+                } else {
+                    printf(ORANGE "Please, firstly fill up all trains.\n" WHITE);
+                }
+                break;
+            default:
+                printf(ORANGE "\nExiting program." WHITE);
+                choice = 6;
+        }
+    } while(choice != 6);
+    free(trainPtr);
+    return 0;
+}
+
+// Function to input train details
+void inputTrainDetails_optimized(TrainRegistry_optimized *ptr, int index) {
+    int circ, hour, minute;
+    printf("Enter train number: ");
+    scanf("%d", &(ptr + index)->train_number);
+    printf("Enter destination or destination code: ");
+    scanf("%s", (ptr + index)->destination.destination);
+    printf("Enter departure time (hour minutes): ");
+    scanf("%d %d", &hour, &minute);
+    (ptr + index)->departure_time.hour = hour;
+    (ptr + index)->departure_time.minute = minute;
+    if((ptr + index)->departure_time.hour > 23 || (ptr + index)->departure_time.hour < 0){
+        printf("You selected wrong hour, it will be assumed as 00\n");
+        (ptr + index)->departure_time.hour = 0;
+    }
+    if((ptr + index)->departure_time.minute > 59 || (ptr + index)->departure_time.minute < 0){
+        printf("You selected wrong minutes, it will be assumed as 00\n");
+        (ptr + index)->departure_time.minute = 0;
+    }
+    printf("Enter arrival time (hour minutes): ");
+    scanf("%d %d", &hour, &minute);
+    (ptr + index)->arrival_time.hour = hour;
+    (ptr + index)->arrival_time.minute = minute;
+
+    if((ptr + index)->arrival_time.hour > 23 || (ptr + index)->arrival_time.hour < 0){
+        printf("You selected wrong hour, it will be assumed as 00\n");
+        (ptr + index)->arrival_time.hour = 0;
+    }
+    if((ptr + index)->arrival_time.minute > 59 || (ptr + index)->arrival_time.minute < 0){
+        printf("You selected wrong minutes, it will be assumed as 00\n");
+        (ptr + index)->arrival_time.minute = 0;
+    }
+    printf("Enter circulation days (1 - Daily, 2 - Odd, 3 - Even): ");
+    scanf("%d", &circ);
+    if(circ == 1){
+        strcpy((ptr + index)->circulation_days, "Daily");
+    } else if(circ == 2) {
+        strcpy((ptr + index)->circulation_days, "Odd");
+    } else {
+        strcpy((ptr + index)->circulation_days, "Even");
+    }
+}
+
+
+// Function to display train details
+void displayTrainDetails_optimized(const TrainRegistry_optimized *ptr, int index) {
+    printf("Train number: %d\n", (ptr + index)->train_number);
+    printf("Destination: %s\n", (ptr + index)->destination.destination);
+    printf("Departure time: %02d:%02d\n", (ptr + index)->departure_time.hour, (ptr + index)->departure_time.minute);
+    printf("Arrival time: %02d:%02d\n", (ptr + index)->arrival_time.hour, (ptr + index)->arrival_time.minute);
+    printf("Circulation days: %s\n", (ptr + index)->circulation_days);
+}
+
+
+// Function to partition the array for Quick Sort based on departure time
+int partition_optimized(TrainRegistry_optimized *arr, int low, int high) {
+    Time pivot_time = arr[high].departure_time;
+    int i = low - 1;
+    for (int j = low; j <= high - 1; j++) {
+        if (arr[j].departure_time.hour < pivot_time.hour || (arr[j].departure_time.hour == pivot_time.hour && arr[j].departure_time.minute < pivot_time.minute)) {
+            i++;
+            TrainRegistry_optimized temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    TrainRegistry_optimized temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    return (i + 1);
+}
+
+// Function to perform Quick Sort on train details based on departure time
+void quickSort_optimized(TrainRegistry_optimized *arr, int low, int high) {
+    if (low < high) {
+        int pi = partition_optimized(arr, low, high);
+        quickSort_optimized(arr, low, pi - 1);
+        quickSort_optimized(arr, pi + 1, high);
+    }
+}
+
+// Function to perform Merge Sort on train details based on departure time
+void merge_optimized(TrainRegistry_optimized arr[], int l, int m, int r) {
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    TrainRegistry_optimized L[n1], R[n2];
+    for (i = 0; i < n1; i++)
+        L[i] = arr[l + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[m + 1 + j];
+    i = 0;
+    j = 0;
+    k = l;
+    while (i < n1 && j < n2) {
+        if (arr[l + i].departure_time.hour < arr[m + 1 + j].departure_time.hour || (arr[l + i].departure_time.hour == arr[m + 1 + j].departure_time.hour && arr[l + i].departure_time.minute < arr[m + 1 + j].departure_time.minute)) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort_optimized(TrainRegistry_optimized arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort_optimized(arr, l, m);
+        mergeSort_optimized(arr, m + 1, r);
+        merge_optimized(arr, l, m, r);
+    }
+}
+
+// Function to modify train details
+void modifyTrainDetails_optimized(TrainRegistry_optimized *ptr, int size) {
+    int train_number, hour, minute;;
+    printf("Enter train number to modify: ");
+    scanf("%d", &train_number);
+
+    int found_index = -1;
+    for (int i = 0; i < size; i++) {
+        if (ptr[i].train_number == train_number) {
+            found_index = i;
+            break;
+        }
+    }
+
+    if (found_index != -1) {
+        printf("Train with train number %d found. Choose what to modify:\n", train_number);
+        printf("1. Everything\n");
+        printf("2. Train number\n");
+        printf("3. Destination\n");
+        printf("4. Departure time\n");
+        printf("5. Arrival time\n");
+        printf("6. Circulation days\n");
+        int choice;
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                inputTrainDetails_optimized(ptr, found_index);
+                printf("Train details modified successfully.\n");
+                break;
+            case 2:
+                printf("Enter new train number: ");
+                scanf("%d", &ptr[found_index].train_number);
+                printf("Train number modified successfully.\n");
+                break;
+            case 3:
+                printf("Enter new destination or destination code: ");
+                scanf("%s", ptr[found_index].destination.destination);
+                printf("Destination modified successfully.\n");
+                break;
+            case 4:
+                printf("Enter departure time (hour minutes): ");
+                scanf("%d %d", &hour, &minute);
+                ptr[found_index].departure_time.hour = hour;
+                ptr[found_index].departure_time.minute = minute;
+                if(ptr[found_index].departure_time.hour > 23 || ptr[found_index].departure_time.hour < 0){
+                    printf("You selected wrong hour, it will be assumed as 00\n");
+                    ptr[found_index].departure_time.hour = 0;
+                }
+                if(ptr[found_index].departure_time.minute > 59 || ptr[found_index].departure_time.minute < 0){
+                    printf("You selected wrong minutes, it will be assumed as 00\n");
+                    ptr[found_index].departure_time.minute = 0;
+                }
+                break;
+            case 5:
+                printf("Enter arrival time (hour minutes): ");
+                scanf("%d %d", &hour, &minute);
+                ptr[found_index].arrival_time.hour = hour;
+                ptr[found_index].arrival_time.minute = minute;
+
+                if(ptr[found_index].arrival_time.hour > 23 || ptr[found_index].arrival_time.hour < 0){
+                    printf("You selected wrong hour, it will be assumed as 00\n");
+                    ptr[found_index].arrival_time.hour = 0;
+                }
+                if(ptr[found_index].arrival_time.minute > 59 || ptr[found_index].arrival_time.minute < 0){
+                    printf("You selected wrong minutes, it will be assumed as 00\n");
+                    ptr[found_index].arrival_time.minute = 0;
+                }
+                break;
+            case 6:
+                printf("Enter new circulation days: ");
+                scanf("%s", ptr[found_index].circulation_days);
+                printf("Circulation days modified successfully.\n");
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+    } else {
+        printf("Train with train number %d not found.\n", train_number);
+    }
+}
+
+Header file:
+#ifndef TRAIN_REGISTRY_OPTIMIZED_H
+#define TRAIN_REGISTRY_OPTIMIZED_H
+#define DESTINATION_SIZE 50
+
+typedef struct {
+    unsigned int hour : 5;
+    unsigned int minute : 6;
+} Time;
+
+typedef union {
+    char destination[DESTINATION_SIZE];
+    int destination_code;
+} Destination;
+
+typedef struct {
+    int train_number;
+    Destination destination;
+    Time departure_time;
+    Time arrival_time;
+    char circulation_days[10];
+} TrainRegistry_optimized;
+
+int train_registry_optimized_main();
+
+#endif
+
+Main function:
+#include <stdio.h>
+#include <stdlib.h>
+#include "train_registry_struct.h"
+#include "train_registry_optimized.h"
+
+int main() {
+    int choice;
+   
+    printf("Choose an option:\n");
+    printf("1. Standard version (using STRUCT keyword)\n");
+    printf("2. Optimized version (using UNION, typedef, and Bit Fields)\n");
+    printf("Enter your choice: ");
+    scanf("%d", &choice);
+   
+    switch (choice) {
+        case 1:
+            train_registry_struct_main();
+            break;
+        case 2:
+            train_registry_optimized_main();
+            break;
+        default:
+            printf("Invalid choice.\n");
+            break;
+    }
+   
+    return 0;
